@@ -33,12 +33,16 @@ resource "oci_database_autonomous_database_wallet" "autonomous_data_warehouse_wa
 
 resource "local_file" "autonomous_data_warehouse_wallet_file" {
   content_base64 = oci_database_autonomous_database_wallet.autonomous_data_warehouse_wallet.content
-  filename       = "${path.module}/autonomous_data_warehouse_wallet.zip"
+  filename       = var.walletPath
 }
 
 output "autonomous_data_warehouse_wallet_password" {
   value = random_string.autonomous_data_warehouse_wallet_password.result
 }
 output "autonomous_data_warehouse_wallet_Location" {
+  value = local_file.autonomous_data_warehouse_wallet_file.filename
+}
+
+output "adw_ocid" {
   value = local_file.autonomous_data_warehouse_wallet_file.filename
 }

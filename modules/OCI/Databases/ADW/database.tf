@@ -20,3 +20,25 @@ resource "oci_database_autonomous_database" "test_autonomous_database" {
 
 }
 
+resource "random_string" "autonomous_data_warehouse_wallet_password" {
+  length  = 16
+  special = true
+}
+
+resource "oci_database_autonomous_database_wallet" "autonomous_data_warehouse_wallet" {
+  autonomous_database_id = oci_database_autonomous_database.test_autonomous_database[0].id
+  password               = random_string.autonomous_data_warehouse_wallet_password.result
+  base64_encode_content  = "true"
+}
+
+resource "local_file" "autonomous_data_warehouse_wallet_file" {
+  content_base64 = oci_database_autonomous_database_wallet.autonomous_data_warehouse_wallet.content
+  filename       = "${path.module}/autonomous_data_warehouse_wallet.zip"
+}
+
+output "autonomous_data_warehouse_wallet_password" {
+  value = random_string.autonomous_data_warehouse_wallet_password.result
+}
+output "autonomous_data_warehouse_wallet_Location" {
+  value = local_file.autonomous_data_warehouse_wallet_file.filename
+}

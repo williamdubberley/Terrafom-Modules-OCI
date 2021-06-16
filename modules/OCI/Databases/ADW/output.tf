@@ -1,3 +1,6 @@
-output "adw_ocid" {
-  value = oci_database_autonomous_database.test_autonomous_database[0].id
+output "autonomous_data_warehouse_wallet_password" {
+  value = random_string.autonomous_data_warehouse_wallet_password.result
+}
+output "autonomous_data_warehouse_wallet_Location" {
+  value = local_file.autonomous_data_warehouse_wallet_file.filename
 }

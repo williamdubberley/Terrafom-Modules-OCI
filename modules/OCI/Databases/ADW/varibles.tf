@@ -48,5 +48,7 @@ variable "compartment_ocid" {
   default = ""
 }
 
-
+variable "walletPath" {
+  default = ""
+}
 

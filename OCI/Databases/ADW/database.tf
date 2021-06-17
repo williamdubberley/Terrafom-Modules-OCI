@@ -33,7 +33,7 @@ resource "oci_database_autonomous_database_wallet" "autonomous_data_warehouse_wa
 
 resource "local_file" "autonomous_data_warehouse_wallet_file" {
   content_base64 = oci_database_autonomous_database_wallet.autonomous_data_warehouse_wallet.content
-  filename       = var.walletPath
+  filename       = "${var.walletPath}${var.walletName}"
 }
 
 

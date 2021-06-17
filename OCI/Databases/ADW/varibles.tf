@@ -51,4 +51,7 @@ variable "compartment_ocid" {
 variable "walletPath" {
   default = ""
 }
+variable "walletName" {
+  default = ""
+}
 

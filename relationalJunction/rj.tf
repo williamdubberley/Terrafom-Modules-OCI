@@ -75,14 +75,30 @@ resource "oci_core_instance" "rj_instance" {
   count = var.rj_enabled == true ? 1 : 0
 
 }
-resource "null_resource" "initialize" {
-  depends_on = [oci_core_instance.rj_instance]
-  count      = 1
-  //"${local.enable_rsync ? var.compute_instance_count : 0}"
 
-  //provisioner "local-exec" {
-  //  command = "sleep 120" # Wait for cloud-init to complete
-  // }
+
+locals {
+  firstboot = <<-EOT
+sudo yum update -y
+sudo yum upgrade -y
+
+sudo unzip -d /home/tomcat/rj/1000/file/${var.dbname} ${var.walletName} 
+
+
+  EOT
+}
+
+resource "local_file" "firstboot" {
+  filename = "${path.module}/first-boot.sh"
+  content  = local.firstboot
+}
+
+// provisioner "local-exec" {
+//command = "${format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.output_file_name, data.template_file.script.rendered)}"
+//}
+resource "null_resource" "wallet" {
+  depends_on = [oci_core_instance.rj_instance]
+  count      = var.adw_enabled == true ? 1 : 0
   connection {
     agent   = false
     timeout = var.timeout
@@ -96,13 +112,44 @@ resource "null_resource" "initialize" {
     source      = "${var.walletPath}${var.walletName}"
     destination = "~/${var.walletName}"
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo unzip -d /home/tomcat/rj/1000/file/${var.dbname} ${var.walletName} "
+    ]
+  }
+}
+resource "null_resource" "initialize" {
+  depends_on = [oci_core_instance.rj_instance]
+  count      = 1
+  //"${local.enable_rsync ? var.compute_instance_count : 0}"
+
+
+  //provisioner "local-exec" {
+  //  command = "sleep 120" # Wait for cloud-init to complete
+  // }
+  connection {
+    agent   = false
+    timeout = var.timeout
+    host    = oci_core_instance.rj_instance.*.public_ip[0]
+    user    = var.compute_instance_user
+    #      private_key         = "${file("${var.compute_ssh_private_key}")}"
+    private_key = var.ssh_private_key
+
+  }
+
   provisioner "remote-exec" {
 
 
     inline = [
-      "upgrade"
+      "sudo yum update -y",
+      "sudo yum upgrade -y",
+      "upgrade",
     ]
   }
 }
 
-
+output "RJ_URL" {
+  description = "url to connect to"
+  value       = "http://${oci_core_instance.rj_instance.*.public_ip[0]}:8080/rj"
+}

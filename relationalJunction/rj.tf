@@ -76,26 +76,6 @@ resource "oci_core_instance" "rj_instance" {
 
 }
 
-
-locals {
-  firstboot = <<-EOT
-sudo yum update -y
-sudo yum upgrade -y
-
-sudo unzip -d /home/tomcat/rj/1000/file/${var.dbname} ${var.walletName} 
-
-
-  EOT
-}
-
-resource "local_file" "firstboot" {
-  filename = "${path.module}/first-boot.sh"
-  content  = local.firstboot
-}
-
-// provisioner "local-exec" {
-//command = "${format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.output_file_name, data.template_file.script.rendered)}"
-//}
 resource "null_resource" "wallet" {
   depends_on = [oci_core_instance.rj_instance]
   count      = var.adw_enabled == true ? 1 : 0
@@ -142,8 +122,6 @@ resource "null_resource" "initialize" {
 
 
     inline = [
-      "sudo yum update -y",
-      "sudo yum upgrade -y",
       "upgrade",
     ]
   }
